@@ -112,3 +112,15 @@ describe("most blogs", () => {
     expect(result).toEqual({ author: "Edsger W. Dijkstra", blogs: 1 });
   });
 });
+
+describe("most liked authors", () => {
+  test("returns the author with most likes and the number of likes", () => {
+    const result = listHelper.mostLikes(blogs);
+    expect(result).toEqual({ author: "Edsger W. Dijkstra", likes: 17 });
+  });
+
+  test("returns the author with most likes and the number of likes", () => {
+    const result = listHelper.mostLikes(listWithOneBlog);
+    expect(result).toEqual({ author: "Edsger W. Dijkstra", likes: 5 });
+  });
+});
