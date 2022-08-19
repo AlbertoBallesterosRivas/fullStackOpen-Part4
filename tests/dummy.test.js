@@ -100,3 +100,15 @@ describe("most liked", () => {
     });
   });
 });
+
+describe("most blogs", () => {
+  test("returns the author with most blogs and the number of blogs written", () => {
+    const result = listHelper.mostBlogs(blogs);
+    expect(result).toEqual({ author: "Robert C. Martin", blogs: 3 });
+  });
+
+  test("returns the author with most blogs and the number of blogs written", () => {
+    const result = listHelper.mostBlogs(listWithOneBlog);
+    expect(result).toEqual({ author: "Edsger W. Dijkstra", blogs: 1 });
+  });
+});
