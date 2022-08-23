@@ -51,7 +51,6 @@ test('the unique identifier property of the blog posts is named id', async () =>
 
 test('a valid blog can be added', async () => {
   const newBlog = {
-    id: "idTest",
     title: "Title test",
     author: "Autor test",
     url: "www.urltest.com",
@@ -70,6 +69,23 @@ test('a valid blog can be added', async () => {
 
   expect(response.body).toHaveLength(initialBlogs.length + 1)
   expect(responsePost.body.title).toContain("Title test")
+})
+
+test('blog without likes will default to the value 0', async () => {
+  const newBlog = {
+    title: "Title test",
+    author: "Autor test",
+    url: "www.urltest.com",
+  }
+
+  const responsePost = await api
+    .post('/api/blogs')
+    .send(newBlog)
+    .expect(201)
+
+  const response = await api.get('/api/blogs')
+
+  expect(responsePost.body.likes).toEqual(0)
 })
 
 afterAll(() => {
