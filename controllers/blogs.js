@@ -1,6 +1,15 @@
+const jwt = require("jsonwebtoken");
 const blogsRouter = require("express").Router();
 const Blog = require("../models/blog");
-const User = require('../models/user')
+const User = require("../models/user");
+
+const getTokenFrom = (request) => {
+  const authorization = request.get("authorization");
+  if (authorization && authorization.toLowerCase().startsWith("bearer ")) {
+    return authorization.substring(7);
+  }
+  return null;
+};
 
 // blogsRouter.get('/', (request, response) => {
 //   Blog.find({}).then(blogs => {
@@ -9,7 +18,11 @@ const User = require('../models/user')
 // })
 
 blogsRouter.get("/", async (request, response) => {
-  const blogs = await Blog.find({}).populate('user', { username: 1, name: 1, id: 1 });
+  const blogs = await Blog.find({}).populate("user", {
+    username: 1,
+    name: 1,
+    id: 1,
+  });
   response.json(blogs);
 });
 
@@ -24,16 +37,19 @@ blogsRouter.get("/", async (request, response) => {
 blogsRouter.post("/", async (request, response, next) => {
   const body = request.body;
 
-  
+  const token = getTokenFrom(request)
+  const decodedToken = jwt.verify(token, process.env.SECRET)
+  if (!decodedToken.id) {
+    return response.status(401).json({ error: 'token missing or invalid' })
+  }
+  const user = await User.findById(decodedToken.id)
 
-  // const users = await app.get("/api/users");
-  // const user = users.body[0].id
-  const users = await User.find({})
-  const id = users[0].id
-  const user = await User.findById(id)
+  // const users = await User.find({});
+  // const id = users[0].id;
+  // const user = await User.findById(id);
 
   if (body.title === undefined || body.url === undefined) {
-    return response.status(400).json({ error: 'content missing' })
+    return response.status(400).json({ error: "content missing" });
   }
 
   const blog = new Blog({
@@ -41,31 +57,29 @@ blogsRouter.post("/", async (request, response, next) => {
     author: body.author,
     url: body.url,
     likes: body.likes || 0,
-    user: id
+    user: user.id,
   });
-
-  
 
   const newBlog = await blog.save();
 
-  user.blogs = user.blogs.concat(newBlog._id)
-  await user.save()
+  user.blogs = user.blogs.concat(newBlog._id);
+  await user.save();
 
   response.status(201).json(newBlog);
 });
 
-blogsRouter.delete('/:id', async (request, response) => {
-  await Blog.findByIdAndRemove(request.params.id)
-  response.status(204).end()
-})
+blogsRouter.delete("/:id", async (request, response) => {
+  await Blog.findByIdAndRemove(request.params.id);
+  response.status(204).end();
+});
 
-blogsRouter.get('/:id', async (request, response) => {
-  const blog = await Blog.findById(request.params.id)
+blogsRouter.get("/:id", async (request, response) => {
+  const blog = await Blog.findById(request.params.id);
   if (blog) {
-    response.json(blog)
+    response.json(blog);
   } else {
-    response.status(404).end()
+    response.status(404).end();
   }
-})
+});
 
 module.exports = blogsRouter;
